@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import api from '../utils/api';  // ← Koristi api instance
+import api from '../utils/api';
 
 const AuthContext = createContext();
 
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await api.post('/auth/login', {  // ← Bez hardcoded URL-a
+      const response = await api.post('/auth/login', {
         email,
         password
       });
@@ -46,26 +46,33 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', response.data.token);
       setUser(response.data.user);
       setIsAuthenticated(true);
-      return response.data;
+      return { success: true };
     } catch (error) {
-      throw error;
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Greška pri prijavi'
+      };
     }
   };
 
-  const register = async (username, email, password) => {
+  // ← PROMIJENIO: email PA username (umjesto username PA email)
+  const register = async (email, username, password) => {
     try {
-      const response = await api.post('/auth/register', {  // ← Bez hardcoded URL-a
-        username,
+      const response = await api.post('/auth/register', {
         email,
+        username,
         password
       });
       
       localStorage.setItem('token', response.data.token);
       setUser(response.data.user);
       setIsAuthenticated(true);
-      return response.data;
+      return { success: true };
     } catch (error) {
-      throw error;
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Greška pri registraciji'
+      };
     }
   };
 
