@@ -1,0 +1,125 @@
+.prediction-reminder {
+  margin: 20px auto;
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+.reminder-content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reminder-icon {
+  font-size: 1.8em;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.reminder-text {
+  flex: 1;
+  font-size: 1em;
+  line-height: 1.4;
+}
+
+.reminder-text strong {
+  font-size: 1.2em;
+  color: #ffd700;
+}
+
+.reminder-btn {
+  background: white;
+  color: #667eea;
+  padding: 10px 24px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.reminder-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.close-reminder {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+
+.close-reminder:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .prediction-reminder {
+    padding: 0 15px;
+  }
+
+  .reminder-content {
+    flex-wrap: wrap;
+    padding: 15px;
+    gap: 12px;
+  }
+
+  .reminder-icon {
+    font-size: 1.5em;
+  }
+
+  .reminder-text {
+    flex-basis: 100%;
+    order: 1;
+    font-size: 0.95em;
+  }
+
+  .reminder-btn {
+    flex: 1;
+    order: 2;
+    text-align: center;
+    padding: 10px 20px;
+  }
+
+  .close-reminder {
+    order: 0;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+  }
+}
