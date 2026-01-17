@@ -13,9 +13,12 @@ function Home() {
   const [topUsers, setTopUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+useEffect(() => {
+  const loadData = async () => {
+    // tvoj fetch kod ovdje
+  };
+  loadData();
+}, []); // ✅ definiraš funkciju unutar useEffect-a
 
   const fetchData = async () => {
     try {

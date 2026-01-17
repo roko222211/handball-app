@@ -11,7 +11,7 @@ import Leaderboard from './pages/Leaderboard';
 import Predictions from './pages/Predictions';
 import Admin from './pages/Admin';
 import TournamentPredictions from './pages/TournamentPredictions/TournamentPredictions';
-import TournamentAdmin from './pages/admin/TournamentAdmin';
+import TournamentAdmin from './pages/Admin/TournamentAdmin';
 import './App.css';
 
 
