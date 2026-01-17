@@ -13,41 +13,38 @@ function Home() {
   const [topUsers, setTopUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  const loadData = async () => {
-    // tvoj fetch kod ovdje
-  };
-  loadData();
-}, []); // ✅ definiraš funkciju unutar useEffect-a
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Dohvati statistiku korisnika
+        const statsRes = await api.get(`/leaderboard/user/${user.id}`);
+        setStats(statsRes.data.stats);
 
-  const fetchData = async () => {
-    try {
-      // Dohvati statistiku korisnika
-      const statsRes = await api.get(`/leaderboard/user/${user.id}`);
-      setStats(statsRes.data.stats);
+        // Dohvati nadolazeće utakmice (samo one sa poznatim timovima)
+        const matchesRes = await api.get('/matches');
+        const upcoming = matchesRes.data
+          .filter(m => 
+            !m.is_finished && 
+            new Date(m.match_date) > new Date() &&
+            !m.home_team.includes('TBD') &&
+            !m.away_team.includes('TBD')
+          )
+          .slice(0, 5);
+        setUpcomingMatches(upcoming);
 
-      // Dohvati nadolazeće utakmice (samo one sa poznatim timovima)
-      const matchesRes = await api.get('/matches');
-      const upcoming = matchesRes.data
-        .filter(m => 
-          !m.is_finished && 
-          new Date(m.match_date) > new Date() &&
-          !m.home_team.includes('TBD') &&
-          !m.away_team.includes('TBD')
-        )
-        .slice(0, 5);
-      setUpcomingMatches(upcoming);
+        // Dohvati top 5 korisnika
+        const leaderboardRes = await api.get('/leaderboard');
+        setTopUsers(leaderboardRes.data.slice(0, 5));
 
-      // Dohvati top 5 korisnika
-      const leaderboardRes = await api.get('/leaderboard');
-      setTopUsers(leaderboardRes.data.slice(0, 5));
-
-      setLoading(false);
-    } catch (error) {
-      console.error('Greška:', error);
-      setLoading(false);
-    }
-  };
+        setLoading(false);
+      } catch (error) {
+        console.error('Greška:', error);
+        setLoading(false);
+      }
+    };
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (loading) {
     return <div className="loading">Učitavanje...</div>;
@@ -100,6 +97,7 @@ useEffect(() => {
                   </div>
                   <div className="match-date">
                     {new Date(match.match_date).toLocaleDateString('hr-HR', {
+                      timeZone: 'Europe/Zagreb',
                       day: 'numeric',
                       month: 'short',
                       hour: '2-digit',

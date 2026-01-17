@@ -9,7 +9,6 @@ const leaderboardRoutes = require('./routes/leaderboard');
 const adminRoutes = require('./routes/admin');
 const tournamentPredictionRoutes = require('./routes/tournamentPredictions');
 
-
 const app = express();
 
 // CORS - dozvoli frontend pristup
@@ -19,7 +18,6 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Dozvoli requests bez origin (npr. mobile apps, Postman)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.includes(origin)) {
@@ -56,15 +54,16 @@ app.get('/api/test', async (req, res) => {
   }
 });
 
-// Routes
+// Routes - SVE PRIJE 404 HANDLERA!
 app.use('/api/auth', authRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/match-stats', matchStatsRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/tournament-predictions', tournamentPredictionRoutes); // ← PREMJESTIO OVDJE
 
-// 404 handler
+// 404 handler - MORA biti ZADNJI route
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
@@ -79,11 +78,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.use('/api/tournament-predictions', tournamentPredictionRoutes);
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📦 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Database: ${process.env.DATABASE_URL ? 'Connected' : 'Local'}`);
 });
+ 

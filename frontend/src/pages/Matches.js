@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import { formatTeamWithFlag } from '../utils/flags';
 import './Matches.css';
 
 function Matches() {
-  const { user } = useAuth();
   const [matches, setMatches] = useState([]);
   const [predictions, setPredictions] = useState({});
   const [loading, setLoading] = useState(true);
@@ -20,6 +18,7 @@ function Matches() {
   useEffect(() => {
     fetchMatches();
     fetchMyPredictions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchMatches = async () => {
@@ -137,6 +136,7 @@ function Matches() {
                     )}
                     <span className="match-date">
                       {new Date(match.match_date).toLocaleDateString('hr-HR', {
+                        timeZone: 'Europe/Zagreb',
                         day: 'numeric',
                         month: 'short',
                         hour: '2-digit',
@@ -236,7 +236,7 @@ function Matches() {
               </div>
               
               <div className="form-group">
-                <label>Top strijelac utakmice (bonus +1 bod):</label>
+                <label>Top strijelac utakmice (bonus +3 boda):</label>
                 <input
                   type="text"
                   placeholder="Puno ime i prezime igrača"
