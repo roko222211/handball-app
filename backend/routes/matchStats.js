@@ -43,71 +43,111 @@ async function calculatePoints(matchId) {
       'SELECT * FROM matches WHERE id = $1',
       [matchId]
     );
-    
+
     if (matchResult.rows.length === 0) return;
-    
+
     const match = matchResult.rows[0];
     const homeScore = match.actual_home_score;
     const awayScore = match.actual_away_score;
     const topScorer = match.top_goalscorer;
-    
+
+    // Safety: if match not really finished or scores missing
+    if (homeScore === null || awayScore === null) return;
+
+    const actualDiff = homeScore - awayScore;
+
     // Dohvati sva predviđanja za ovu utakmicu
     const predictions = await pool.query(
       'SELECT * FROM predictions WHERE match_id = $1',
       [matchId]
     );
-    
+
     for (const pred of predictions.rows) {
       let points = 0;
-      
+
       const predHome = pred.predicted_home_score;
       const predAway = pred.predicted_away_score;
-      
-      // Točan rezultat = 5 bodova
-      if (predHome === homeScore && predAway === awayScore) {
-        points = 5;
+
+      // If prediction missing scores, give 0 (but still allow top scorer check if you want)
+      if (predHome === null || predAway === null) {
+        // Top goalscorer points (optional even without score prediction)
+        if (
+          pred.predicted_top_goalscorer &&
+          topScorer &&
+          pred.predicted_top_goalscorer.trim().toLowerCase() === topScorer.trim().toLowerCase()
+        ) {
+          points += 3;
+        }
+
+        await pool.query(
+          'UPDATE predictions SET points_earned = $1 WHERE id = $2',
+          [points, pred.id]
+        );
+
+        await pool.query(
+          `UPDATE users
+           SET total_points = (
+             SELECT COALESCE(SUM(points_earned), 0)
+             FROM predictions
+             WHERE user_id = $1
+           )
+           WHERE id = $1`,
+          [pred.user_id]
+        );
+
+        continue;
       }
-      // Točna razlika = 3 boda
-      else if ((predHome - predAway) === (homeScore - awayScore)) {
-        points = 3;
+
+      const predDiff = predHome - predAway;
+
+      // 1) Outcome (3 pts): win/lose/draw category
+      const actualOutcome =
+        homeScore > awayScore ? 'H' : homeScore < awayScore ? 'A' : 'D';
+      const predOutcome =
+        predHome > predAway ? 'H' : predHome < predAway ? 'A' : 'D';
+
+      if (predOutcome === actualOutcome) {
+        points += 3;
       }
-      // Točan pobjednik = 1 bod
-      else if (
-        (predHome > predAway && homeScore > awayScore) ||
-        (predHome < predAway && homeScore < awayScore) ||
-        (predHome === predAway && homeScore === awayScore)
+
+      // 2) Goal difference points (4/2/1/0)
+      const diffError = Math.abs(predDiff - actualDiff);
+
+      if (diffError === 0) points += 4;
+      else if (diffError === 1) points += 2;
+      else if (diffError === 2) points += 1;
+
+      // 3) Top goalscorer (3 pts)
+      if (
+        pred.predicted_top_goalscorer &&
+        topScorer &&
+        pred.predicted_top_goalscorer.trim().toLowerCase() === topScorer.trim().toLowerCase()
       ) {
-        points = 1;
+        points += 3;
       }
-      
-      // Bonus: točan top strijelac = +1 bod
-      if (pred.predicted_top_goalscorer && 
-          pred.predicted_top_goalscorer.toLowerCase() === topScorer?.toLowerCase()) {
-        points += 1;
-      }
-      
+
       // Ažuriraj bodove za predviđanje
       await pool.query(
         'UPDATE predictions SET points_earned = $1 WHERE id = $2',
         [points, pred.id]
       );
-      
+
       // Ažuriraj ukupne bodove korisnika
       await pool.query(
-        `UPDATE users 
+        `UPDATE users
          SET total_points = (
-           SELECT COALESCE(SUM(points_earned), 0) 
-           FROM predictions 
+           SELECT COALESCE(SUM(points_earned), 0)
+           FROM predictions
            WHERE user_id = $1
          )
          WHERE id = $1`,
         [pred.user_id]
       );
     }
-    
   } catch (err) {
     console.error('Greška pri izračunu bodova:', err);
   }
 }
+
 
 module.exports = router;

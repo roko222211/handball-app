@@ -10,7 +10,10 @@ import Matches from './pages/Matches';
 import Leaderboard from './pages/Leaderboard';
 import Predictions from './pages/Predictions';
 import Admin from './pages/Admin';
+import TournamentPredictions from './pages/TournamentPredictions/TournamentPredictions';
+import TournamentAdmin from './pages/admin/TournamentAdmin';
 import './App.css';
+
 
 // Protected Route wrapper
 function ProtectedRoute({ children }) {
@@ -22,6 +25,7 @@ function ProtectedRoute({ children }) {
   
   return isAuthenticated ? children : <Navigate to="/login" />;
 }
+
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
@@ -57,15 +61,26 @@ function AppContent() {
             <Predictions />
           </ProtectedRoute>
         } />
+        <Route path="/tournament-predictions" element={
+          <ProtectedRoute>
+            <TournamentPredictions />
+          </ProtectedRoute>
+        } />
         <Route path="/admin" element={
           <ProtectedRoute>
             <Admin />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/tournament" element={
+          <ProtectedRoute>
+            <TournamentAdmin />
           </ProtectedRoute>
         } />
       </Routes>
     </>
   );
 }
+
 
 function App() {
   return (
@@ -76,5 +91,6 @@ function App() {
     </Router>
   );
 }
+
 
 export default App;

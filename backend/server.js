@@ -7,6 +7,8 @@ const predictionRoutes = require('./routes/predictions');
 const matchStatsRoutes = require('./routes/matchStats');
 const leaderboardRoutes = require('./routes/leaderboard');
 const adminRoutes = require('./routes/admin');
+const tournamentPredictionRoutes = require('./routes/tournamentPredictions');
+
 
 const app = express();
 
@@ -76,6 +78,8 @@ app.use((err, req, res, next) => {
       : err.message 
   });
 });
+
+app.use('/api/tournament-predictions', tournamentPredictionRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
